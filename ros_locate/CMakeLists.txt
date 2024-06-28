@@ -10,6 +10,8 @@ project(ros_locate)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
+  cv_bridge
+  ros_locate_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -106,6 +108,7 @@ catkin_package(
 #  LIBRARIES ros-object-detection
 #  CATKIN_DEPENDS roscpp sensor_msgs
 #  DEPENDS system_lib
+  CATKIN_DEPENDS rospy sensor_msgs cv_bridge ros_locate_msgs
 )
 
 ###########
@@ -117,6 +120,7 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -159,7 +163,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  src/obj_detection.py
+  src/obj_location.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

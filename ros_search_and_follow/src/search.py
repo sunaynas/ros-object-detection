@@ -1,5 +1,5 @@
 
-from ros_locate import objLocation
+from ros_locate_msgs import locationMsg
 from unitree_legged_msgs import HighCmdService
 from enum import Enum
 
@@ -13,7 +13,7 @@ class SearchAndFollow:
         rospy.init_node('search_algo', anonymous=True)
         self.rgb_data = rospy.Subscriber(
             "/grounded_dino_object_location/located_object_xoff",
-            ObjLocation,
+            locationMsg,
             self.detection_callback
         )
         self.controller = rospy.ServiceProxy('/controller_node/control_a1', unitree_legged_msgs.srv.HighCmdService)

@@ -2,7 +2,7 @@
 <package format="2">
   <name>ros_locate_msgs</name>
   <version>0.0.0</version>
-  <description>Uses dino to detect objects from camera data</description>
+  <description>Sends location data</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

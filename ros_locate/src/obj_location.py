@@ -10,7 +10,6 @@ from cv_bridge import CvBridge
 
 import rospy
 from sensor_msgs.msg import Image
-from std_msgs.msg import Int32
 from ros_locate_msgs import ObjLocation
 
 class ObjectLocation:
@@ -94,12 +93,12 @@ class ObjectLocation:
         depth_image = self.cv_bridge.imgmsg_to_cv2(self.latest_d_img, desired_encoding='passthrough')
         roi = depth_image[bbox[0]:bbox[2], bbox[1]:bbox[3]] #i think, but it might be swapped
         valid_depths = roi[np.isfinite(roi)]
-        avg_depth = Int32(valid_depths.mean())
+        avg_depth = valid_depths.mean()
         # avg_depth^2 = x^2 + y^2 +z^2
         # but we know the angle 
         xcenter_roi = (bbox[0]+bbox[2])//2
         xcenter = depth_image.shape[1]//2
-        self.obj_xoff_publisher.publish(found=true, xoff=Int32(xcenter_roi-xcenter), dist =avg_depth)
+        self.obj_xoff_publisher.publish(found=true, xoff=xcenter_roi-xcenter, dist =avg_depth)
         return 
 
 def main(args=None):
