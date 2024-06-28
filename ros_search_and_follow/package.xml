@@ -57,10 +57,6 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>unitree_legged_msgs</exec_depend> 
   <exec_depend>ros_locate_msgs</exec_depend>
-  
-  <depend>rospy</depend>
-  <depend>unitree_legged_msgs</depend> 
-  <depend>ros_locate_msgs</depend>
   <depend>generate_parameter_library</depend>
 
   <exec_depend>launch</exec_depend>
