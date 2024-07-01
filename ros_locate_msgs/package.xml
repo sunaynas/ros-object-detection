@@ -56,6 +56,7 @@
   <exec_depend>rospy</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <depend>std_msgs</depend>
+  <depend>message_generation</depend>
   <depend>generate_parameter_library</depend>
 
 

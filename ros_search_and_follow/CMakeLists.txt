@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   unitree_legged_msgs
   ros_locate_msgs
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
