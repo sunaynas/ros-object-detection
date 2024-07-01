@@ -18,6 +18,10 @@ set(OpenCV_DIR "/usr/share/opencv4"
 ## System dependencies are found with CMake's conventions
 find_package(OpenCV REQUIRED)
 
+#set(Torch_DIR "/home/robofob/Lib/libtorch/share/cmake/Torch/")    
+#find_package(Torch REQUIRED)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")    
+#add_compile_options(-std=c++17)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -116,13 +120,12 @@ catkin_package(
 ## Build ##
 ###########
 
+#add_executable(${PROJECT_NAME}_node src/build.cpp)
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
-  #include
-  ${catkin_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
-)
+include_directories(${catkin_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -132,12 +135,12 @@ include_directories(
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(${PROJECT
+#_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-#add_executable(${PROJECT_NAME}_node src/build.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -172,7 +175,8 @@ catkin_install_python(PROGRAMS
   # ${OpenCV_LIBRARIES}
 #)
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS} )
+link_libraries(${OpenCV_LIBRARIES})
+link_libraries(${catkin_LIBRARIES})
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
