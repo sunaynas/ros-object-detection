@@ -108,7 +108,7 @@ catkin_package(
 #  LIBRARIES ros-object-detection
 #  CATKIN_DEPENDS roscpp sensor_msgs
 #  DEPENDS system_lib
-  CATKIN_DEPENDS rospy std_msgs unitree_legged_msgs ros_locate
+  CATKIN_DEPENDS rospy std_msgs unitree_legged_msgs
 )
 
 ###########
@@ -162,7 +162,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  src/search_and_follow_node.py
+  src/search.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

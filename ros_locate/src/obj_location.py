@@ -1,19 +1,20 @@
+#!/usr/bin/env python
 
 import argparse
+
+from cv_bridge import CvBridge
+
+import rospy
+from sensor_msgs.msg import Image
+from  ros_locate_msgs import ObjLocation
+
 import torch
 import numpy as np
 import PIL as pil
 from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection
 
-import cv2
-from cv_bridge import CvBridge
-
-import rospy
-from sensor_msgs.msg import Image
-from ros_locate_msgs import ObjLocation
-
 class ObjectLocation:
-    def __init__(self, search_prompt: str):
+    def __init__(self, search_prompt):
         rospy.init_node('grounded_dino_object_location', anonymous=True)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model_id = "IDEA-Research/grounding-dino-tiny"
