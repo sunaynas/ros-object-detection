@@ -1,7 +1,11 @@
-
-from ros_locate_msgs import locationMsg
+#!/usr/bin/env python
+import rospy
+from sensor_msgs.msg import Image 
+from geometry_msg.msg import Point
 from unitree_legged_msgs import HighCmdService
 from enum import Enum
+from cv_bridge import CvBridge
+import numpy as np
 
 
 class SearchAndFollow:
@@ -9,56 +13,111 @@ class SearchAndFollow:
         SEARCHING = 'searching'
         FOLLOWING = 'following'
 
-    def __init__(self, tolerance):
+    def __init__(self, xtolerance, dtolerance):
         rospy.init_node('search_algo', anonymous=True)
-        self.rgb_data = rospy.Subscriber(
-            "/grounded_dino_object_location/located_object_xoff",
-            locationMsg,
-            self.detection_callback
+        self.pt1_sub = rospy.Subscriber(
+            "located_object_minPt",
+            Point,
+            self.min_pt_callback
         )
-        self.controller = rospy.ServiceProxy('/controller_node/control_a1', unitree_legged_msgs.srv.HighCmdService)
-        self.locData = None
-        self.tolerance = tolerance
+	self.pt2_sub = rospy.Subscriber(
+            "located_object_maxPt",
+            Point,
+            self.max_pt_callback
+        )
+	self.depth_sub = rospy.Subscriber(
+            "/camera/depth/image_rect_raw",
+            Image,
+            self.depth_callback
+        )
+	
+        self.controller = rospy.ServiceProxy(
+	    '/controller_node/control_a1', 
+	    unitree_legged_msgs.srv.HighCmdService
+	)
+
+	self.cv_bridge = CvBridge()
+
+        self.xoff = Int32(0)
+        self.obj_detected = False
+	self.depth_map = None
+	self.min_pt = None
+	self.max_pt = None
+
+        self.x_tolerance = abs(xtolerance)
+	self.dist_tolerance = abs(dtolerance)
         self.kp = 0.1
         self.state= self.state.SEARCHING
         
 
-    def detection_callback(self, loc):
-        self.locData = loc
+    def min_pt_callback(self, min_pt):
+        self.min_pt = min_pt
+
+    def max_pt_callback(self, max_pt):
+        self.max_pt = max_pt
+
+    def process_detection(self):
+	if self.min_pt is not None and self.max_pt is not None and self.depth_map is not None:
+	   if self.min_pt.x <= 0:
+		self.obj_detected = False
+	   else:		
+		self.xoff = (self.depth_map.shape[1])//2 - (max_pt.x + min_pt.x)//2
+       		self.obj_detected = True
+	   self.min_pt = None
+	   self.max_pt = None
+
+
+    def depth_callback(self, depth_image):
+        self.depth_map = self.cv_bridge.imgmsg_to_cv2(depth_img, desired_encoding='passthrough')
 
     def search(self):
-        p=0.
-        if self.locData.found == False:
+        p=0.0
+        if self.obj_detected == False:
             p = 0.1 # or something like that 
-        if self.locData.xoff < -self.tolerance:
-            p = self.locData.xoff*self.kp
-        else if self.locData.xoff > -self.tolerance:
-            p = -self.locData.xoff*self.kp 
+        elif self.xoff < -self.x_tolerance:
+            p = Float32(self.xoff)*self.kp
+        elif self.xoff > self.x_tolerance:
+            p = -Float32(self.xoff)*self.kp 
         else:
             self.state = self.state.FOLLOW
         self.controller(mode=2, forwardSpeed=0.0, sideSpeed=0.0, rotateSpeed=p)
     
     def follow(self):
-        if self.locData.found == False:
+        if self.obj_detected == False:
             self.state = self.state.SEARCHING
             return
         p = 0.0
-        if self.locData.xoff < -self.tolerance:
-            p = self.locData.xoff*self.kp
-        else if self.locData.xoff > -self.tolerance:
-            p = -self.locData.xoff*self.kp 
+        if self.xoff < -self.x_tolerance:
+            p = min(Float32(self.xoff)*self.kp, 0.1)
+        elif self.xoff > -self.x_tolerance:
+            p = max(-Float32(self.xoff)*self.kp, -0.1) 
         
-       
+        obj_dist = np.mean(self.depth_image[self.min_pt.x:self.max_pt.x, self.min_pt.y:self.max_pt.y])
+	closest = np.min(self.depth_image)
+	
+	fs = 0.0
+	ss = 0.0
+	if (closest > self.dist_tolerance):
+	    fs = min(0.1, self.kp*obj_dist)
+	else:
+	    lft_dist = np.mean(self.depth_image[:, :width//2])
+	    right_dist = np.mean(self.depth_image[:, width//2:])
+	    if lft_dist > right_dist:
+		ss = -0.05
+	    else:
+		ss = 0.05
+
         # can make pid to get closer to obj
         # else if self.locData.dist < 
-        self.controller(mode=2, forwardSpeed=0.1, sideSpeed=0.0, rotateSpeed=p)
+        self.controller(mode=2, forwardSpeed=fs, sideSpeed=ss, rotateSpeed=p)
     
     def run (self):
-        rate = rospy.Rate(50)  
+        rate = rospy.Rate(10)  
         while not rospy.is_shutdown():
+	    process_detection()
             if self.state == self.State.SEARCHING:
                 search()
-            else if self.state == self.State.FOLLOWING:
+            elif self.state == self.State.FOLLOWING:
                 follow()
             rate.sleep()
     

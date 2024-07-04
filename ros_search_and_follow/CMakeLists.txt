@@ -10,9 +10,12 @@ project(ros_search_and_follow)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   unitree_legged_msgs
-  ros_locate_msgs
-  std_msgs
+  sensor_msgs
+  geometry_msgs
+  cv_bridge
 )
+
+find_package(OpenCV REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -108,7 +111,7 @@ catkin_package(
 #  LIBRARIES ros-object-detection
 #  CATKIN_DEPENDS roscpp sensor_msgs
 #  DEPENDS system_lib
-  CATKIN_DEPENDS rospy std_msgs unitree_legged_msgs
+  CATKIN_DEPENDS rospy unitree_legged_msgs sensor_msgs geometry_msgs cv_bridge
 )
 
 ###########
@@ -117,10 +120,8 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
-# include
-  ${catkin_INCLUDE_DIRS}
-)
+include_directories(${catkin_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -165,6 +166,9 @@ catkin_install_python(PROGRAMS
   src/search.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+link_libraries(${OpenCV_LIBRARIES})
+link_libraries(${catkin_LIBRARIES})
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
